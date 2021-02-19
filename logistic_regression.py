@@ -26,16 +26,22 @@ def train(args, model, device, dataset, optimizer):
     data, target = dataset
     data, target = data.to(device), target.to(device)
     class Closure():
+        def __init__(self, model):
+            self.model = model
+
+        def loss(self):
+            output = model(data)
+            return F.nll_loss(output, target) 
+
         def __call__(self):
             optimizer.zero_grad()
-            output = model(data)
-            loss = F.nll_loss(output, target) 
+            loss = self.loss()
             loss.backward()
-            self.loss = loss.item()
+            self._loss = loss.item()
             return loss
-    closure = Closure()
+    closure = Closure(model)
     optimizer.step(closure)
-    print(f"Train Loss: {closure.loss:.2f}")
+    print(f"Train Loss: {closure._loss:.2f}")
 
 def test(model, device, dataset):
     model.eval()
