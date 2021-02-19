@@ -54,13 +54,13 @@ def test(model, device, dataset):
 
 def main():
     # Training settings
-    parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
-    parser.add_argument('--lr', type=float, default=1.0, metavar='LR',
-                        help='learning rate (default: 1.0)')
+    parser = argparse.ArgumentParser(description='Logistic Regression'
+            ' Example Optimization without Hessian')
+    parser.add_argument('--method', type=str, default='CG',
+                        choices=["CG", "BFGS", "L-BFGS-B", "TNC", "SLSQP"],
+                        help='Which scipy.optimize.minimize method to use.')
     parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='disables CUDA training')
-    parser.add_argument('--epochs', type=int, default=14, metavar='N',
-                        help='number of epochs to train (default: 14)')
     parser.add_argument('--seed', type=int, default=1, metavar='S',
                         help='random seed (default: 1)')
     parser.add_argument('--save-model', action='store_true', default=False,
@@ -97,11 +97,7 @@ def main():
     test_dataset = next(iter(test_loader))
 
     model = LogReg().to(device)
-    # optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
-    minimizer_args = dict(method="CG", options={'disp':True, 'maxiter':100})
-    # minimizer_args = dict(method="Newton-CG", options={'disp':True})
-    # minimizer_args = dict(method="L-BFGS-B", options={'disp':True})
-    # minimizer_args = dict(method="BFGS", options={'disp':True})
+    minimizer_args = dict(method=args.method, options={'disp':True, 'maxiter':100})
     optimizer = MinimizeWrapper(model.parameters(), minimizer_args)
 
     train(args, model, device, train_dataset, optimizer)
