@@ -21,7 +21,7 @@ class LogReg(nn.Module):
         return output
 
 
-def train(args, model, device, dataset, optimizer, epoch):
+def train(args, model, device, dataset, optimizer):
     model.train()
     data, target = dataset
     data, target = data.to(device), target.to(device)
@@ -35,7 +35,7 @@ def train(args, model, device, dataset, optimizer, epoch):
             return loss
     closure = Closure()
     optimizer.step(closure)
-    print(f"Step: {epoch} Loss: {closure.loss:.2f}")
+    print(f"Train Loss: {closure.loss:.2f}")
 
 def test(model, device, dataset):
     model.eval()
@@ -100,15 +100,14 @@ def main():
 
     model = LogReg().to(device)
     # optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
-    minimizer_args = dict(method="CG", options={'disp':True})
+    minimizer_args = dict(method="CG", options={'disp':True, 'maxiter':100})
     # minimizer_args = dict(method="Newton-CG", options={'disp':True})
     # minimizer_args = dict(method="L-BFGS-B", options={'disp':True})
     # minimizer_args = dict(method="BFGS", options={'disp':True})
     optimizer = MinimizeWrapper(model.parameters(), minimizer_args)
 
-    for epoch in range(1, args.epochs + 1):
-        train(args, model, device, train_dataset, optimizer, epoch)
-        test(model, device, test_dataset)
+    train(args, model, device, train_dataset, optimizer)
+    test(model, device, test_dataset)
 
     if args.save_model:
         torch.save(model.state_dict(), "mnist_cnn.pt")
