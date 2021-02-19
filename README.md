@@ -171,8 +171,8 @@ From a [discussion on the PyTorch forum][forum] the only way to calculate
 the gradient with respect to the parameters would be to monkey patch
 `inputs` into the model and then calculate the loss. I wrote a [generic
 recursive monkey patch][monkey] that operates on a deepcopy of the original
-`model`. This involves copying everything in the model so it's probably not
-very fast.
+`model`. This involves copying everything in the model so it's not
+very efficient.
 
 The function passed to `scipy.optimize.minimize` as `hess` does the
 following:
