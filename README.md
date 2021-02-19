@@ -25,7 +25,7 @@ This package can be installed with pip directly from Github:
 python -m pip install git+https://github.com/gngdb/pytorch-minimize.git
 ```
 
-Or by cloning the repository and then using dev install:
+Or by cloning the repository and then installing:
 
 ```
 git clone https://github.com/gngdb/pytorch-minimize.git
@@ -60,12 +60,12 @@ optimizer.step(closure)
 
 This optimizer is intended for **deterministic optimisation problems**,
 such as [full batch learning problems][batch]. Because of this,
-`.step(closure)` should only needs to be called **once**, with the number
+`.step(closure)` should only need to be called **once**, with the number
 of iterations chosen in `minimizer_args['options']['maxiter']` as above.
 
-*Can `.step(closure)` be called more than once?* Yes, but it shouldn't be
-necessary when the method is performing multiple steps internally up to the
-`maxiter` option in `minimizer_args`.
+Can `.step(closure)` be called more than once? Yes, but it shouldn't be
+necessary because multiple steps are run internally up to the `maxiter`
+option in `minimizer_args`.
 
 Which Algorithms Are Supported?
 -------------------------------
@@ -108,9 +108,7 @@ class Closure():
 closure = Closure(model)
 ```
 
-The following methods can then be used with some questionable hacks (see
-below) by evaluating the beta
-[`torch.autograd.functional.hessian`][torchhessian]:
+The following methods can then be chosen: 
 
 * [Newton Conjugate Gradient](https://youtu.be/0qUAb94CpOw?t=30m41s): `'Newton-CG'`
 * [Newton Conjugate Gradient Trust-Region][trust]: `'trust-ncg'`
@@ -118,8 +116,9 @@ below) by evaluating the beta
 * [Nearly Exact Trust-Region][trust]: `'trust-exact'`
 * [Constrained Trust-Region][trust]: `'trust-constr'`
 
-All the above methods are included in the tests and converge on a toy
-classification problem.
+Internally, some questionable hacks make it possible to call
+[torch.autograd.functional.hessian][torchhessian] (which is itself only
+supplied as beta functionality).
 
 Algorithms You Can Choose But Don't Work
 ----------------------------------------
@@ -129,6 +128,9 @@ errors. You can still select them but they may not work:
 
 * [Truncated Newton][tnc]: `'TNC'`
 * [Dogleg][]: `'dogleg'`
+
+All the other methods converged on a toy problem and are tested in
+Travis-CI.
 
 How Does it Work?
 -----------------
