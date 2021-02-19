@@ -112,9 +112,9 @@ class MinimizeWrapper(torch.optim.Optimizer):
         # h = hess(x0)
         # print(h)
         # assert False
-        res = minimize(torch_wrapper, x0, hess=hess, **self.minimizer_args)
+        self.res = minimize(torch_wrapper, x0, hess=hess, **self.minimizer_args)
 
         # set the final parameters
-        _params = self.np_unravel_unpack(res.x)
+        _params = self.np_unravel_unpack(self.res.x)
         for p, _p in zip(params, _params):
             p.data = _p
