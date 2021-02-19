@@ -27,7 +27,7 @@ class LogReg(nn.Module):
         output = F.log_softmax(x, dim=1)
         return output
 
-def main(method):
+def main(method, disp=True):
     # only run tests on CPU
     device = torch.device('cpu')
 
@@ -65,25 +65,42 @@ def main(method):
     data, target = train_dataset
     data, target = data.to(device), target.to(device)
     class Closure():
+        def __init__(self, model):
+            self.model = model
+        
+        @staticmethod
+        def loss(model):
+            output = model(data)
+            return F.nll_loss(output, target) 
+
         def __call__(self):
             optimizer.zero_grad()
-            output = model(data)
-            loss = F.nll_loss(output, target) 
+            loss = self.loss(self.model)
             loss.backward()
-            self.loss = loss.item()
+            self._loss = loss.item()
             return loss
-    closure = Closure()
+    closure = Closure(model)
     optimizer.step(closure)
 
     # check if train loss is zero (overfitting)
-    assert abs(closure.loss) < 1e-1, f"Train loss not near zero: {closure.loss}"
-    return optimizer.res, closure.loss
+    assert abs(closure._loss) < 1e-1, f"Train loss not near zero with {method}: {closure._loss}"
+    return optimizer.res, closure._loss
 
-def test_cg():
-    return main("CG")
+def test_jac_methods():
+    # test methods that require only the jacobian and not the hessian
+    methods = ["CG", "BFGS", "L-BFGS-B", "SLSQP"]
+    failing_methods = ["TNC"]
+    for method in methods:
+        _ = main(method, disp=False)
+
+def test_hess_methods():
+    methods = ["Newton-CG", "trust-ncg", "trust-krylov", "trust-exact", "trust-constr"]
+    failing_methods = ["dogleg"]
+    for method in methods:
+        _ = main(method, disp=False)
 
 if __name__ == "__main__":
-    res, loss = test_cg()
+    res, loss = main("trust-constr")
     # print(res)
     print(f"Train Loss: {loss:.2f}")
 
