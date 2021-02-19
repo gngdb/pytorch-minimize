@@ -6,6 +6,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
+from optim import MinimizeWrapper
 
 
 class LogReg(nn.Module):
@@ -75,8 +76,8 @@ def main():
 
     # train_kwargs = {'batch_size': 50000} # all of MNIST
     # test_kwargs = {'batch_size': 10000} # all of MNIST
-    train_kwargs = {'batch_size': 5000} # all of MNIST
-    test_kwargs = {'batch_size': 1000} # all of MNIST
+    train_kwargs = {'batch_size': 500} 
+    test_kwargs = {'batch_size': 100} 
     if use_cuda:
         cuda_kwargs = {'num_workers': 1,
                        'pin_memory': True,
@@ -98,7 +99,12 @@ def main():
     test_dataset = next(iter(test_loader))
 
     model = LogReg().to(device)
-    optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
+    # optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
+    minimizer_args = dict(method="CG", options={'disp':True})
+    # minimizer_args = dict(method="Newton-CG", options={'disp':True})
+    # minimizer_args = dict(method="L-BFGS-B", options={'disp':True})
+    # minimizer_args = dict(method="BFGS", options={'disp':True})
+    optimizer = MinimizeWrapper(model.parameters(), minimizer_args)
 
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_dataset, optimizer, epoch)
