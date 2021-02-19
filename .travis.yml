@@ -25,12 +25,12 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
   # create environment
-  - conda create -q -n test-environment -c pytorch python=$TRAVIS_PYTHON_VERSION pytorch cpuonly scipy scikit-learn
+  - conda create -q -n test-environment -c pytorch python=$TRAVIS_PYTHON_VERSION pytorch cpuonly scipy scikit-learn pytest
   - conda activate test-environment
   - python -m pip install .
 
 # Command to run tests, e.g. python setup.py test
-script: bash run_tests.sh
+script: pytest
 
 # Assuming you have installed the travis-ci CLI tool, after you
 # create the Github repo and add it to Travis, run the
