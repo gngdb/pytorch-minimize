@@ -80,7 +80,7 @@ supported, along with their `method` name:
 
 To use the methods that require evaluating the Hessian a `Closure` object
 with the following methods is required (full MNIST example
-[here](./mnist/mnist/hessian_logistic_regression.py)):
+[here](./mnist/hessian_logistic_regression.py)):
 
 ```
 class Closure():
