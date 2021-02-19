@@ -1,8 +1,7 @@
 PyTorch Minimize
 ================
 
-[![Travis
-Link](https://travis-ci.com/github/gngdb/pytorch_minimize)](https://travis-ci.com/gngdb/pytorch-minimize.svg?branch=master)
+[![Build Status](https://travis-ci.com/gngdb/pytorch-minimize.svg?branch=master)](https://travis-ci.com/gngdb/pytorch-minimize)
 
 Use [`scipy.optimize.minimize`][scipy] as a PyTorch Optimizer.
 
