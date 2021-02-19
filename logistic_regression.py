@@ -28,14 +28,15 @@ def train(args, model, device, dataset, optimizer):
     class Closure():
         def __init__(self, model):
             self.model = model
-
-        def loss(self):
+        
+        @staticmethod
+        def loss(model):
             output = model(data)
             return F.nll_loss(output, target) 
 
         def __call__(self):
             optimizer.zero_grad()
-            loss = self.loss()
+            loss = self.loss(self.model)
             loss.backward()
             self._loss = loss.item()
             return loss
@@ -106,10 +107,16 @@ def main():
 
     model = LogReg().to(device)
     # optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
-    minimizer_args = dict(method="CG", options={'disp':True, 'maxiter':100})
-    # minimizer_args = dict(method="Newton-CG", options={'disp':True})
+    # minimizer_args = dict(method="CG", options={'disp':True, 'maxiter':100})
     # minimizer_args = dict(method="L-BFGS-B", options={'disp':True})
     # minimizer_args = dict(method="BFGS", options={'disp':True})
+    # Hessian required
+    minimizer_args = dict(method="Newton-CG", options={'disp':True, 'maxiter':100})
+    # minimizer_args = dict(method="dogleg", options={'disp':True, 'maxiter':100})
+    # minimizer_args = dict(method="trust-ncg", options={'disp':True, 'maxiter':100})
+    # minimizer_args = dict(method="trust-exact", options={'disp':True, 'maxiter':100})
+    # minimizer_args = dict(method="trust-constr", options={'disp':True, 'maxiter':100})
+    # minimizer_args = dict(method="trust-krylov", options={'disp':True, 'maxiter':100})
     optimizer = MinimizeWrapper(model.parameters(), minimizer_args)
 
     train(args, model, device, train_dataset, optimizer)

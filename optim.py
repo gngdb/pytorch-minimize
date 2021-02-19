@@ -2,6 +2,7 @@ import torch
 import numpy as np
 from scipy.optimize import minimize
 import functools
+from copy import deepcopy
 
 # thanks to https://stackoverflow.com/a/31174427/6937913
 # recursively set attributes
@@ -12,6 +13,9 @@ def rgetattr(obj, attr, *args):
     def _getattr(obj, attr):
         return getattr(obj, attr, *args)
     return functools.reduce(_getattr, [obj] + attr.split('.'))
+def rdelattr(obj, attr):
+    pre, _, post = attr.rpartition('.')
+    return delattr(rgetattr(obj, pre) if pre else obj, post)
 
 
 class MinimizeWrapper(torch.optim.Optimizer):
@@ -36,6 +40,7 @@ class MinimizeWrapper(torch.optim.Optimizer):
                 tensor = tensor.cpu()
             return tensor.detach().numpy()
         x = np.concatenate([numpyify(tensor).ravel() for tensor in tensors], 0)
+        x = x.astype(np.float64)
         return x
 
     def np_unravel_unpack(self, x):
@@ -72,6 +77,7 @@ class MinimizeWrapper(torch.optim.Optimizer):
                 p.data = _p
             with torch.enable_grad():
                 loss = closure()
+                loss = np.float64(loss.item())
             if self.minimizer_args['jac']:
                 grads = self.ravel_pack([p.grad for p in params])
                 return loss, grads
@@ -80,25 +86,32 @@ class MinimizeWrapper(torch.optim.Optimizer):
 
         if hasattr(closure, 'model'):
             def hess(x):
-                x = torch.tensor(x).requires_grad_()
-                def f(x):
-                    _params = self.unravel_unpack(x)
-                    # monkey patch substitute variables
-                    named_params = closure.model.named_parameters()
-                    for _p, (n, _) in zip(_params, named_params):
-                        _p = torch.nn.Parameter(_p.requires_grad_())
-                        rsetattr(closure.model, n, _p)
-                    return closure.loss()
-                return torch.autograd.functional.hessian(f, x)
+                model = deepcopy(closure.model)
+                with torch.enable_grad():
+                    x = torch.tensor(x).float().requires_grad_()
+                    def f(x):
+                        _params = self.unravel_unpack(x)
+                        # monkey patch substitute variables
+                        named_params = list(model.named_parameters())
+                        for _p, (n, _) in zip(_params, named_params):
+                            rdelattr(model, n)
+                            rsetattr(model, n, _p)
+                        return closure.loss(model)
+                    def numpyify(x):
+                        if x.device != torch.device('cpu'):
+                            x = x.cpu()
+                        return x.numpy().astype(np.float64)
+                    return numpyify(torch.autograd.functional.hessian(f, x))
         else:
             hess = None
 
         # run the minimizer
         x0 = self.ravel_pack(params)
-        h = hess(x0)
-        print(h.size())
-        print(h[:10,:10])
-        assert False
+        # h = hess(x0)
+        # print(h)
+        # h = hess(x0)
+        # print(h)
+        # assert False
         res = minimize(torch_wrapper, x0, hess=hess, **self.minimizer_args)
 
         # set the final parameters
