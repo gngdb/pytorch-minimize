@@ -71,12 +71,19 @@ Which Algorithms Are Supported?
 -------------------------------
 
 Using PyTorch to calculate the Jacobian, the following algorithms are
-supported, along with their `method` name:
+supported:
 
 * [Conjugate Gradients][conjugate]: `'CG'`
 * [Broyden-Fletcher-Goldfarb-Shanno (BFGS)][bfgs]: `'BFGS'`
 * [Limited-memory BFGS][lbfgs]: `'L-BFGS-B'`
 * [Sequential Least Squares Programming][slsqp]: `'SLSQP'`
+
+The method name string is given on the right, corresponding to the names
+used by [scipy.optimize.minimize][scipy].
+
+### Methods that require Hessian evaluations
+
+**Warning**: this is experimental and probably unpredictable.
 
 To use the methods that require evaluating the Hessian a `Closure` object
 with the following methods is required (full MNIST example
@@ -100,10 +107,6 @@ class Closure():
         return loss
 closure = Closure(model)
 ```
-
-### Methods that require Hessian evaluations
-
-**Warning**: this is experimental and probably unpredictable.
 
 The following methods can then be used with some questionable hacks (see
 below) by evaluating the beta
