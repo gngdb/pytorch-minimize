@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import datasets, transforms
-from optim import MinimizeWrapper
+from pytorch_minimize.optim import MinimizeWrapper
 
 
 class LogReg(nn.Module):

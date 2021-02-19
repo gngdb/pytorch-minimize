@@ -3,7 +3,7 @@ import argparse
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from optim import MinimizeWrapper
+from pytorch_minimize.optim import MinimizeWrapper
 import numpy as np
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
