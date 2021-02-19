@@ -31,11 +31,16 @@ class MinimizeWrapper(torch.optim.Optimizer):
         self.jac_methods = ["CG", "BFGS", "L-BFGS-B", "TNC", "SLSQP"]
         self.hess_methods = ["Newton-CG", "dogleg", "trust-ncg",
                              "trust-krylov", "trust-exact", "trust-constr"]
+        self.gradfree_methods = ["Nelder-Mead", "Powell", "COBYLA"]
         method = minimizer_args['method']
         if method in self.jac_methods:
             self.use_hess = False
         elif method in self.hess_methods:
             self.use_hess = True
+        elif method in self.gradfree_methods:
+            self.use_hess = False
+            assert minimizer_args['jac'] == False, \
+                "set minimizer_args['jac']=False to use gradient free algorithms"
         else:
             raise ValueError(f"Method {method} not supported or does not exist")
         self.minimizer_args = minimizer_args
