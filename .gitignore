@@ -103,3 +103,6 @@ ENV/
 
 # IDE settings
 .vscode/
+
+# If you download MNIST data, don't commit it
+data
