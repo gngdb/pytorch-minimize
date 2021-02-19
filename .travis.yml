@@ -30,7 +30,7 @@ install:
   - python -m pip install .
 
 # Command to run tests, e.g. python setup.py test
-script: conda activate test-environment; pytest
+script: bash run_tests.sh
 
 # Assuming you have installed the travis-ci CLI tool, after you
 # create the Github repo and add it to Travis, run the
