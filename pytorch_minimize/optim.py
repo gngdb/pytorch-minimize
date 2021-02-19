@@ -4,15 +4,18 @@ from scipy.optimize import minimize
 import functools
 from copy import deepcopy
 
+
 # thanks to https://stackoverflow.com/a/31174427/6937913
 # recursively set attributes
 def rsetattr(obj, attr, val):
     pre, _, post = attr.rpartition('.')
     return setattr(rgetattr(obj, pre) if pre else obj, post, val)
+
 def rgetattr(obj, attr, *args):
     def _getattr(obj, attr):
         return getattr(obj, attr, *args)
     return functools.reduce(_getattr, [obj] + attr.split('.'))
+
 def rdelattr(obj, attr):
     pre, _, post = attr.rpartition('.')
     return delattr(rgetattr(obj, pre) if pre else obj, post)
@@ -117,11 +120,6 @@ class MinimizeWrapper(torch.optim.Optimizer):
 
         # run the minimizer
         x0 = self.ravel_pack(params)
-        # h = hess(x0)
-        # print(h)
-        # h = hess(x0)
-        # print(h)
-        # assert False
         self.res = minimize(torch_wrapper, x0, hess=hess, **self.minimizer_args)
 
         # set the final parameters

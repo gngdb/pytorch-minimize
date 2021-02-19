@@ -5,16 +5,21 @@ PyTorch Minimize
 
 Use [`scipy.optimize.minimize`][scipy] as a PyTorch Optimizer.
 
-*Warning*: this project is mostly a proof of concept and not intended for
-deployment to anything (for example, parameter arrays will be shuttled on
-and off the GPU between numpy and PyTorch if the GPU is used, which may be
-slow).
+*Warning*: this project is a proof of concept and is not necessarily
+reliable, although [the code](./pytorch_minimize/optim.py) (that's all of
+it) is small enough to be readable.
 
 Quickstart
 ----------
 
-The dependencies are `pytorch` and `scipy`. In a python environment,
-install either by installing from the github repository:
+Dependencies:
+
+* `pytorch`
+* `scipy`
+
+The following install procedure isn't going to check these are installed.
+
+This package can be installed with pip directly from Github:
 
 ``` 
 python -m pip install git+https://github.com/gngdb/pytorch-minimize.git
@@ -28,9 +33,11 @@ cd pytorch-minimize
 python -m pip install .
 ```
 
-The optimizer acts like a standard [PyTorch Optimizer][optimizer], taking a
-generator of parameters, and is configured by passing a dictionary of
-arguments for [`scipy.optimize.minimize`][scipy]:
+The Optimizer is `MinimizeWrapper` in `pytorch_minimize.optim`.  It has the
+same interface as a [PyTorch Optimizer][optimizer], taking a generator of
+parameters, and is configured by passing a dictionary of arguments, here
+called `minimizer_args`, that will later be passed to
+[`scipy.optimize.minimize`][scipy]:
 
 ```
 from pytorch_minimize.optim import MinimizeWrapper
@@ -38,8 +45,8 @@ minimizer_args = dict(method='CG', options={'disp':True, 'maxiter':100})
 optimizer = MinimizeWrapper(model.parameters(), minimizer_args)
 ```
 
-The difference to using this and most PyTorch optimizers is you need to
-define a [closure][]:
+The main difference when using this optimizer as opposed to most PyTorch
+optimizers is a [closure][] must be defined:
 
 ```
 def closure():
@@ -53,8 +60,12 @@ optimizer.step(closure)
 
 This optimizer is intended for **deterministic optimisation problems**,
 such as [full batch learning problems][batch]. Because of this,
-`.step(closure)` only needs to be called **once**, with the number of
-iterations chosen in `minimizer_args['options']['maxiter']` as above.
+`.step(closure)` should only needs to be called **once**, with the number
+of iterations chosen in `minimizer_args['options']['maxiter']` as above.
+
+*Can `.step(closure)` be called more than once?* Yes, but it shouldn't be
+necessary when the method is performing multiple steps internally up to the
+`maxiter` option in `minimizer_args`.
 
 Which Algorithms Are Supported?
 -------------------------------
@@ -69,7 +80,7 @@ supported, along with their `method` name:
 
 To use the methods that require evaluating the Hessian a `Closure` object
 with the following methods is required (full MNIST example
-[here](./mnist/hessian_logistic_regression.py)):
+[here](./mnist/mnist/hessian_logistic_regression.py)):
 
 ```
 class Closure():
@@ -90,6 +101,10 @@ class Closure():
 closure = Closure(model)
 ```
 
+### Methods that require Hessian evaluations
+
+**Warning**: this is experimental and probably unpredictable.
+
 The following methods can then be used with some questionable hacks (see
 below) by evaluating the beta
 [`torch.autograd.functional.hessian`][torchhessian]:
@@ -106,11 +121,36 @@ classification problem.
 Algorithms You Can Choose But Don't Work
 ----------------------------------------
 
-A few algorithms tested didn't converge on the toy problem, or threw
+A few algorithms tested didn't converge on the toy problem or hit
 errors. You can still select them but they may not work:
 
 * [Truncated Newton][tnc]: `'TNC'`
 * [Dogleg][]: `'dogleg'`
+
+How Does it Work?
+-----------------
+
+[`scipy.optimize.minimize`][scipy] is expecting to receive a function `fun` that
+returns a scalar and an array of gradients the same size as the initial
+input array `x0`. To accomodate this `MinimizeWrapper` does the following:
+
+1. Creates a wrapper function that will be passed as `fun`
+2. In that function:
+    1. Unpack the numpy array into parameter tensors
+    2. Substitute each parameter in place with these tensors
+    3. Evaluates `closure`, which will now use these parameter values
+    4. Extract the gradients
+    5. Pack the gradients back into one 1D numpy array
+    6. Return the loss value and the gradient array
+
+Then, all that's left is to call `scipy.optimize.minimize` and unpack the
+optimal parameters found back into the model.
+
+This procedure involves unpacking and packing arrays, along with moving
+back and forth between numpy and pytorch, which may incur some overhead. I
+haven't done any profiling to find out if it's likely to be a big problem
+and it runs OK optimizing a logistic regression on MNIST by conjugate
+gradients.
 
 How Does This Evaluate the Hessian?
 -----------------------------------
