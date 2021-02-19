@@ -26,16 +26,23 @@ def train(args, model, device, dataset, optimizer):
     data, target = dataset
     data, target = data.to(device), target.to(device)
     class Closure():
+        def __init__(self, model):
+            self.model = model
+        
+        @staticmethod
+        def loss(model):
+            output = model(data)
+            return F.nll_loss(output, target) 
+
         def __call__(self):
             optimizer.zero_grad()
-            output = model(data)
-            loss = F.nll_loss(output, target) 
+            loss = self.loss(self.model)
             loss.backward()
-            self.loss = loss.item()
+            self._loss = loss.item()
             return loss
-    closure = Closure()
+    closure = Closure(model)
     optimizer.step(closure)
-    print(f"Train Loss: {closure.loss:.2f}")
+    print(f"Train Loss: {closure._loss:.2f}")
 
 def test(model, device, dataset):
     model.eval()
@@ -100,10 +107,16 @@ def main():
 
     model = LogReg().to(device)
     # optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
-    minimizer_args = dict(method="CG", options={'disp':True, 'maxiter':100})
-    # minimizer_args = dict(method="Newton-CG", options={'disp':True})
+    # minimizer_args = dict(method="CG", options={'disp':True, 'maxiter':100})
     # minimizer_args = dict(method="L-BFGS-B", options={'disp':True})
     # minimizer_args = dict(method="BFGS", options={'disp':True})
+    # Hessian required
+    minimizer_args = dict(method="Newton-CG", options={'disp':True, 'maxiter':100})
+    # minimizer_args = dict(method="dogleg", options={'disp':True, 'maxiter':100})
+    # minimizer_args = dict(method="trust-ncg", options={'disp':True, 'maxiter':100})
+    # minimizer_args = dict(method="trust-exact", options={'disp':True, 'maxiter':100})
+    # minimizer_args = dict(method="trust-constr", options={'disp':True, 'maxiter':100})
+    # minimizer_args = dict(method="trust-krylov", options={'disp':True, 'maxiter':100})
     optimizer = MinimizeWrapper(model.parameters(), minimizer_args)
 
     train(args, model, device, train_dataset, optimizer)
