@@ -120,17 +120,22 @@ Internally, some questionable hacks make it possible to call
 [torch.autograd.functional.hessian][torchhessian] (which is itself only
 supplied as beta functionality).
 
-Algorithms You Can Choose But Don't Work
-----------------------------------------
+### Algorithms without gradients
 
-A few algorithms tested didn't converge on the toy problem or hit
+If using the `scipy.optimize.minimize` algorithms that don't require
+gradients, such as `'Nelder-Mead'`, `'COBYLA'` or `'Powell'`, ensure that
+`minimizer_args['jac'] = False` before instancing `MinimizeWrapper`.
+
+### Algorithms You can choose but don't work
+
+Two algorithms tested didn't converge on the toy problem or hit
 errors. You can still select them but they may not work:
 
 * [Truncated Newton][tnc]: `'TNC'`
 * [Dogleg][]: `'dogleg'`
 
-All the other methods converged on a toy problem and are tested in
-Travis-CI.
+All the other methods that require gradients converged on a toy problem and
+are tested in Travis-CI.
 
 How Does it Work?
 -----------------
