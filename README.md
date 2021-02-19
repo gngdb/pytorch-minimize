@@ -179,10 +179,9 @@ output.
 
 From a [discussion on the PyTorch forum][forum] the only way to calculate
 the gradient with respect to the parameters would be to monkey patch
-`inputs` into the model and then calculate the loss. I wrote a [generic
-recursive monkey patch][monkey] that operates on a deepcopy of the original
-`model`. This involves copying everything in the model so it's not
-very efficient.
+`inputs` into the model and then calculate the loss. I wrote a [recursive
+monkey patch][monkey] that operates on a deepcopy of the original `model`.
+This involves copying everything in the model so it's not very efficient.
 
 The function passed to `scipy.optimize.minimize` as `hess` does the
 following:
@@ -207,7 +206,7 @@ This package was created with [Cookiecutter][] and the
 
 [re_attr]: https://stackoverflow.com/a/31174427/6937913 
 [deepcopy]: https://docs.python.org/3/library/copy.html#copy.deepcopy
-[monkey]: https://github.com/gngdb/pytorch-minimize/blob/master/pytorch_minimize/optim.py#L98-L114
+[monkey]: https://github.com/gngdb/pytorch-minimize/blob/master/pytorch_minimize/optim.py#L100-L117
 [forum]: https://discuss.pytorch.org/t/using-autograd-functional-jacobian-hessian-with-respect-to-nn-module-parameters/103994/3
 [dogleg]: https://en.wikipedia.org/wiki/Powell%27s_dog_leg_method
 [tnc]: https://en.wikipedia.org/wiki/Truncated_Newton_method
