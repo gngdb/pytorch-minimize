@@ -25,6 +25,16 @@ class MinimizeWrapper(torch.optim.Optimizer):
             minimizer_args['jac'] = True
         assert minimizer_args['jac'] in [True, False], \
                 "separate jac function not supported"
+        self.jac_methods = ["CG", "BFGS", "L-BFGS-B", "TNC", "SLSQP"]
+        self.hess_methods = ["Newton-CG", "dogleg", "trust-ncg",
+                             "trust-krylov", "trust-exact", "trust-constr"]
+        method = minimizer_args['method']
+        if method in self.jac_methods:
+            self.use_hess = False
+        elif method in self.hess_methods:
+            self.use_hess = True
+        else:
+            raise ValueError(f"Method {method} not supported or does not exist")
         self.minimizer_args = minimizer_args
         if 'options' not in self.minimizer_args:
             self.minimizer_args.update({'options':{}})
@@ -84,7 +94,7 @@ class MinimizeWrapper(torch.optim.Optimizer):
             else:
                 return loss
 
-        if hasattr(closure, 'model'):
+        if hasattr(closure, 'model') and self.use_hess:
             def hess(x):
                 model = deepcopy(closure.model)
                 with torch.enable_grad():
