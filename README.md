@@ -166,6 +166,7 @@ This package was created with [Cookiecutter][] and the
 [torchhessian]: https://pytorch.org/docs/stable/autograd.html#torch.autograd.functional.hessian
 [slsqp]: https://en.wikipedia.org/wiki/Sequential_quadratic_programming
 [conjugate]: https://en.wikipedia.org/wiki/Conjugate_gradient_method
+[lbfgs]: https://en.wikipedia.org/wiki/Limited-memory_BFGS
 [bfgs]: https://en.wikipedia.org/wiki/Broyden%E2%80%93Fletcher%E2%80%93Goldfarb%E2%80%93Shanno_algorithm
 [batch]: https://towardsdatascience.com/batch-mini-batch-stochastic-gradient-descent-7a62ecba642a
 [closure]: https://pytorch.org/docs/stable/optim.html#optimizer-step-closure
