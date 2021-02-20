@@ -206,7 +206,7 @@ This package was created with [Cookiecutter][] and the
 
 [re_attr]: https://stackoverflow.com/a/31174427/6937913 
 [deepcopy]: https://docs.python.org/3/library/copy.html#copy.deepcopy
-[monkey]: https://github.com/gngdb/pytorch-minimize/blob/master/pytorch_minimize/optim.py#L100-L117
+[monkey]: https://github.com/gngdb/pytorch-minimize/blob/master/pytorch_minimize/optim.py#L106-L122
 [forum]: https://discuss.pytorch.org/t/using-autograd-functional-jacobian-hessian-with-respect-to-nn-module-parameters/103994/3
 [dogleg]: https://en.wikipedia.org/wiki/Powell%27s_dog_leg_method
 [tnc]: https://en.wikipedia.org/wiki/Truncated_Newton_method
