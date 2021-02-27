@@ -230,6 +230,7 @@ and [PyTorch][pytorchcite].
 This package was created with [Cookiecutter][] and the
 [`audreyr/cookiecutter-pypackage`][audreyr] project template.
 
+[pytorchcite]: https://github.com/pytorch/pytorch/blob/master/CITATION
 [numpycite]: https://www.scipy.org/citing.html#numpy
 [scipycite]: https://www.scipy.org/citing.html#scipy-the-library
 [re_attr]: https://stackoverflow.com/a/31174427/6937913 
