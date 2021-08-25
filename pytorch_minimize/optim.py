@@ -83,10 +83,6 @@ class MinimizeWrapper(torch.optim.Optimizer):
     def step(self, closure):
         group = next(iter(self.param_groups))
         params = group['params']
-        # this check passes
-        # _params = self.np_unravel_unpack(self.ravel_pack(params))
-        # for p, _p in zip(params, _params):
-        #     assert torch.abs(p-_p).max() < 1e-5
 
         def torch_wrapper(x):
             # monkey patch set parameter values
