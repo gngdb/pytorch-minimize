@@ -76,7 +76,7 @@ class MinimizeWrapper(torch.optim.Optimizer):
             p = x[i:i+j].view(_p.size())
             p = p.to(_p.device)
             params.append(p)
-            i = j
+            i += j
         return params
 
     @torch.no_grad()
