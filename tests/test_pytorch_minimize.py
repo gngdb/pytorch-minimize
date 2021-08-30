@@ -92,9 +92,8 @@ def main(method, disp=True, floatX='float32'):
 
 def test_jac_methods():
     # test methods that require only the jacobian and not the hessian
-    methods = ["CG", "BFGS", "L-BFGS-B", "SLSQP"]
-    failing_methods = ["TNC"]
-    failing_combinations = [("L-BFGS-B", "float32")]
+    methods = ["CG", "BFGS", "L-BFGS-B", "SLSQP", "TNC"]
+    failing_combinations = [("L-BFGS-B", "float32"), ("TNC", "float32")]
     for method in methods:
         for floatX in ["float32", "float64"]:
             if (method, floatX) not in failing_combinations:
@@ -109,7 +108,7 @@ def test_hess_methods():
 
 if __name__ == "__main__":
     #res, loss = main("L-BFGS-B", floatX='float64')
-    res, loss = main("CG", floatX='float64')
+    res, loss = main("TNC", floatX='float32')
     # print(res)
     print(f"Train Loss: {loss:.2f}")
 

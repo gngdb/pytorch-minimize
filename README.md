@@ -90,6 +90,7 @@ supported:
     * `nn.Module` containing parameters must be cast to double, example:
 `model = model.double()`
 * [Sequential Least Squares Programming][slsqp]: `'SLSQP'`
+* [Truncated Newton][tnc]: `'TNC'` but **also requires double precision**
 
 The method name string is given on the right, corresponding to the names
 used by [scipy.optimize.minimize][scipy].
@@ -143,7 +144,6 @@ gradients (such as `'Nelder-Mead'`, `'COBYLA'` or `'Powell'`), ensure that
 Two algorithms I tested didn't converge on a toy problem or hit errors.
 You can still select them but they may not work:
 
-* [Truncated Newton][tnc]: `'TNC'`
 * [Dogleg][]: `'dogleg'`
 
 All the other methods that require gradients converged on a toy problem
