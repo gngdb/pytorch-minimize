@@ -20,14 +20,41 @@ def rdelattr(obj, attr):
     pre, _, post = attr.rpartition('.')
     return delattr(rgetattr(obj, pre) if pre else obj, post)
 
+# generic float casting
+def floatX(x, np_to, torch_to):
+    if isinstance(x, np.ndarray):
+        return x.astype(np_to)
+    elif isinstance(x, torch.Tensor):
+        return x.to(torch_to)
+    elif isinstance(x, float):
+        return np_to(x)
+    else:
+        raise ValueError('Only numpy arrays and torch tensors can be cast to'
+                f'float, not {x} of type {type(x)}')
+
+float32 = functools.partial(floatX, np_to=np.float32, torch_to=torch.float32)
+float64 = functools.partial(floatX, np_to=np.float64, torch_to=torch.float64)
+# float32 = functools.partial(floatX, np.float32, torch.float32)
+# float64 = functools.partial(floatX, np.float64, torch.float64)
 
 class MinimizeWrapper(torch.optim.Optimizer):
-    def __init__(self, params, minimizer_args):
+    def __init__(self, params, minimizer_args, floatX='float32'):
         assert type(minimizer_args) is dict
         if 'jac' not in minimizer_args:
             minimizer_args['jac'] = True
         assert minimizer_args['jac'] in [True, False], \
                 "separate jac function not supported"
+        params = [p for p in params]
+        if floatX == 'float32':
+            assert all(p.dtype == torch.float32 for p in params), \
+                'model.float() before passing parameters'
+            self.floatX = float32
+        elif floatX == 'float64':
+            assert  all(p.dtype == torch.float64 for p in params), \
+                'model.double() before passing parameters'
+            self.floatX = float64
+        else:
+            raise ValueError('Only float or double parameters permitted')
         self.jac_methods = ["CG", "BFGS", "L-BFGS-B", "TNC", "SLSQP"]
         self.hess_methods = ["Newton-CG", "dogleg", "trust-ncg",
                              "trust-krylov", "trust-exact", "trust-constr"]
@@ -58,11 +85,13 @@ class MinimizeWrapper(torch.optim.Optimizer):
                 tensor = tensor.cpu()
             return tensor.detach().numpy()
         x = np.concatenate([numpyify(tensor).ravel() for tensor in tensors], 0)
-        x = x.astype(np.float64)
+        # x = x.astype(np.float64)
+        x = self.floatX(x)
         return x
 
     def np_unravel_unpack(self, x):
-        x = torch.from_numpy(x.astype(np.float32))
+        #x = torch.from_numpy(x.astype(np.float32))
+        x = torch.from_numpy(self.floatX(x))
         return self.unravel_unpack(x)
 
     def unravel_unpack(self, x):
@@ -91,7 +120,8 @@ class MinimizeWrapper(torch.optim.Optimizer):
                 p.data = _p
             with torch.enable_grad():
                 loss = closure()
-                loss = np.float64(loss.item())
+                #loss = np.float64(loss.item())
+                loss = self.floatX(loss.item())
             if self.minimizer_args['jac']:
                 grads = self.ravel_pack([p.grad for p in params])
                 return loss, grads
@@ -102,7 +132,7 @@ class MinimizeWrapper(torch.optim.Optimizer):
             def hess(x):
                 model = deepcopy(closure.model)
                 with torch.enable_grad():
-                    x = torch.tensor(x).float().requires_grad_()
+                    x = self.floatX(torch.tensor(x)).requires_grad_()
                     def f(x):
                         _params = self.unravel_unpack(x)
                         # monkey patch substitute variables
@@ -114,7 +144,8 @@ class MinimizeWrapper(torch.optim.Optimizer):
                     def numpyify(x):
                         if x.device != torch.device('cpu'):
                             x = x.cpu()
-                        return x.numpy().astype(np.float64)
+                        #return x.numpy().astype(np.float64)
+                        return self.floatX(x.numpy())
                     return numpyify(torch.autograd.functional.hessian(f, x))
         else:
             hess = None

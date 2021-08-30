@@ -27,7 +27,7 @@ class LogReg(nn.Module):
         output = F.log_softmax(x, dim=1)
         return output
 
-def main(method, disp=True):
+def main(method, disp=True, floatX='float32'):
     # only run tests on CPU
     device = torch.device('cpu')
 
@@ -58,12 +58,16 @@ def main(method, disp=True):
 
     # instance optimizer
     minimizer_args = dict(method=method, options={'disp':True, 'maxiter':10000})
-    optimizer = MinimizeWrapper(model.parameters(), minimizer_args)
+    if floatX == 'float64':
+        model = model.double()
+    optimizer = MinimizeWrapper(model.parameters(), minimizer_args, floatX=floatX)
 
     # train
     model.train()
     data, target = train_dataset
     data, target = data.to(device), target.to(device)
+    if floatX == 'float64':
+        data = data.double()
     class Closure():
         def __init__(self, model):
             self.model = model
@@ -90,17 +94,21 @@ def test_jac_methods():
     # test methods that require only the jacobian and not the hessian
     methods = ["CG", "BFGS", "L-BFGS-B", "SLSQP"]
     failing_methods = ["TNC"]
+    failing_combinations = [("L-BFGS-B", "float32")]
     for method in methods:
-        _ = main(method, disp=False)
+        for floatX in ["float32", "float64"]:
+            if (method, floatX) not in failing_combinations:
+                _ = main(method, disp=False, floatX=floatX)
 
 def test_hess_methods():
     methods = ["Newton-CG", "trust-ncg", "trust-krylov", "trust-exact", "trust-constr"]
     failing_methods = ["dogleg"]
     for method in methods:
-        _ = main(method, disp=False)
+        for floatX in ['float32', 'float64']:
+            _ = main(method, disp=False, floatX=floatX)
 
 if __name__ == "__main__":
-    res, loss = main("trust-constr")
+    res, loss = main("L-BFGS-B", floatX='float64')
     # print(res)
     print(f"Train Loss: {loss:.2f}")
 
