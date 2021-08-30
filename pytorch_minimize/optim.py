@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from scipy.optimize import minimize
+from scipy.optimize import minimize, basinhopping
 import functools
 from copy import deepcopy
 
@@ -101,6 +101,9 @@ class MinimizeWrapper(torch.optim.Optimizer):
             i += j
         return params
 
+    def minimize(self, func, x0, **minimizer_args):
+        return minimize(func, x0, **minimizer_args)
+
     @torch.no_grad()
     def step(self, closure):
         group = next(iter(self.param_groups))
@@ -144,9 +147,18 @@ class MinimizeWrapper(torch.optim.Optimizer):
 
         # run the minimizer
         x0 = self.ravel_pack(params)
-        self.res = minimize(torch_wrapper, x0, hess=hess, **self.minimizer_args)
+        self.res = self.minimize(torch_wrapper, x0, hess=hess, **self.minimizer_args)
 
         # set the final parameters
         _params = self.np_unravel_unpack(self.res.x)
         for p, _p in zip(params, _params):
             p.data = _p
+
+class BasinHoppingWrapper(MinimizeWrapper):
+    def __init__(self, params, minimizer_args, basinhopping_kwargs):
+        self.basinhopping_kwargs = basinhopping_kwargs
+        super().__init__(params, minimizer_args)
+
+    def minimize(self, func, x0, **minimizer_args):
+        return basinhopping(func, x0, minimizer_kwargs=minimizer_args,
+                **self.basinhopping_kwargs)

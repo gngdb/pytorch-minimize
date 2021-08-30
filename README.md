@@ -78,6 +78,23 @@ optimization algorithm will be interrupted.
 
 [torch_lbfgs]: https://pytorch.org/docs/stable/optim.html#torch.optim.LBFGS
 
+### Basin Hopping
+
+A similar wrapper is provided for the [basin-hopping algorithm][hop]. To
+use it, provide keyword arguments for the `basinhopping` function in
+addition to the arguments for the inner loop `minimize` function:
+
+```
+from pytorch_minimize.optim import MinimizeWrapper
+minimizer_args = dict(method='CG', options={'disp':True, 'maxiter':100})
+basinhopping_kwargs = dict(niter=200)
+optimizer = MinimizeWrapper(model.parameters(), minimizer_args, basinhopping_kwargs)
+```
+
+The same closure must be defined as above.
+
+[hop]: https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.basinhopping.html#scipy.optimize.basinhopping
+
 Which Algorithms Are Supported?
 -------------------------------
 
