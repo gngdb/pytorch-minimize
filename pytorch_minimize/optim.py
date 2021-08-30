@@ -34,24 +34,19 @@ def floatX(x, np_to, torch_to):
 
 float32 = functools.partial(floatX, np_to=np.float32, torch_to=torch.float32)
 float64 = functools.partial(floatX, np_to=np.float64, torch_to=torch.float64)
-# float32 = functools.partial(floatX, np.float32, torch.float32)
-# float64 = functools.partial(floatX, np.float64, torch.float64)
+
 
 class MinimizeWrapper(torch.optim.Optimizer):
-    def __init__(self, params, minimizer_args, floatX='float32'):
+    def __init__(self, params, minimizer_args):
         assert type(minimizer_args) is dict
         if 'jac' not in minimizer_args:
             minimizer_args['jac'] = True
         assert minimizer_args['jac'] in [True, False], \
                 "separate jac function not supported"
         params = [p for p in params]
-        if floatX == 'float32':
-            assert all(p.dtype == torch.float32 for p in params), \
-                'model.float() before passing parameters'
+        if all(p.dtype == torch.float32 for p in params):
             self.floatX = float32
-        elif floatX == 'float64':
-            assert  all(p.dtype == torch.float64 for p in params), \
-                'model.double() before passing parameters'
+        elif all(p.dtype == torch.float64 for p in params):
             self.floatX = float64
         else:
             raise ValueError('Only float or double parameters permitted')
@@ -85,12 +80,10 @@ class MinimizeWrapper(torch.optim.Optimizer):
                 tensor = tensor.cpu()
             return tensor.detach().numpy()
         x = np.concatenate([numpyify(tensor).ravel() for tensor in tensors], 0)
-        # x = x.astype(np.float64)
         x = self.floatX(x)
         return x
 
     def np_unravel_unpack(self, x):
-        #x = torch.from_numpy(x.astype(np.float32))
         x = torch.from_numpy(self.floatX(x))
         return self.unravel_unpack(x)
 
@@ -120,7 +113,6 @@ class MinimizeWrapper(torch.optim.Optimizer):
                 p.data = _p
             with torch.enable_grad():
                 loss = closure()
-                #loss = np.float64(loss.item())
                 loss = self.floatX(loss.item())
             if self.minimizer_args['jac']:
                 grads = self.ravel_pack([p.grad for p in params])

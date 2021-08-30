@@ -60,7 +60,7 @@ def main(method, disp=True, floatX='float32'):
     minimizer_args = dict(method=method, options={'disp':True, 'maxiter':10000})
     if floatX == 'float64':
         model = model.double()
-    optimizer = MinimizeWrapper(model.parameters(), minimizer_args, floatX=floatX)
+    optimizer = MinimizeWrapper(model.parameters(), minimizer_args)
 
     # train
     model.train()
@@ -108,7 +108,8 @@ def test_hess_methods():
             _ = main(method, disp=False, floatX=floatX)
 
 if __name__ == "__main__":
-    res, loss = main("L-BFGS-B", floatX='float64')
+    #res, loss = main("L-BFGS-B", floatX='float64')
+    res, loss = main("CG", floatX='float64')
     # print(res)
     print(f"Train Loss: {loss:.2f}")
 

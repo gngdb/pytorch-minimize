@@ -89,8 +89,6 @@ supported:
 * [Limited-memory BFGS][lbfgs]: `'L-BFGS-B'` but **requires double precision**:
     * `nn.Module` containing parameters must be cast to double, example:
 `model = model.double()`
-    * keyword arg `floatX` must be set to `'float64'`, example:
-    `MinimizeWrapper(model.parameters(), minimizer_args, floatX='float64')`
 * [Sequential Least Squares Programming][slsqp]: `'SLSQP'`
 
 The method name string is given on the right, corresponding to the names
