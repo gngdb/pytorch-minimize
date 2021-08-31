@@ -1,6 +1,13 @@
 import torch
 import numpy as np
-from scipy.optimize import minimize, basinhopping
+from scipy.optimize import (
+        minimize, 
+        basinhopping, 
+        brute, 
+        differential_evolution, 
+        shgo,
+        dual_annealing
+        )
 import functools
 from copy import deepcopy
 
@@ -43,13 +50,7 @@ class MinimizeWrapper(torch.optim.Optimizer):
             minimizer_args['jac'] = True
         assert minimizer_args['jac'] in [True, False], \
                 "separate jac function not supported"
-        params = [p for p in params]
-        if all(p.dtype == torch.float32 for p in params):
-            self.floatX = float32
-        elif all(p.dtype == torch.float64 for p in params):
-            self.floatX = float64
-        else:
-            raise ValueError('Only float or double parameters permitted')
+        params = self.set_floatX(params)
         self.jac_methods = ["CG", "BFGS", "L-BFGS-B", "TNC", "SLSQP"]
         self.hess_methods = ["Newton-CG", "dogleg", "trust-ncg",
                              "trust-krylov", "trust-exact", "trust-constr"]
@@ -72,6 +73,16 @@ class MinimizeWrapper(torch.optim.Optimizer):
             self.minimizer_args['options'].update({'maxiter':2})
         super(MinimizeWrapper, self).__init__(params, self.minimizer_args)
         assert len(self.param_groups) == 1, "only supports one group"
+
+    def set_floatX(self, params):
+        params = [p for p in params]
+        if all(p.dtype == torch.float32 for p in params):
+            self.floatX = float32
+        elif all(p.dtype == torch.float64 for p in params):
+            self.floatX = float64
+        else:
+            raise ValueError('Only float or double parameters permitted')
+        return params
 
     def ravel_pack(self, tensors):
         # pack tensors into a numpy array
@@ -109,7 +120,7 @@ class MinimizeWrapper(torch.optim.Optimizer):
         group = next(iter(self.param_groups))
         params = group['params']
 
-        def torch_wrapper(x):
+        def torch_wrapper(x, return_grad=False, *args):
             # monkey patch set parameter values
             _params = self.np_unravel_unpack(x)
             for p, _p in zip(params, _params):
@@ -117,11 +128,13 @@ class MinimizeWrapper(torch.optim.Optimizer):
             with torch.enable_grad():
                 loss = closure()
                 loss = self.floatX(loss.item())
-            if self.minimizer_args['jac']:
+            if return_grad:
                 grads = self.ravel_pack([p.grad for p in params])
                 return loss, grads
             else:
                 return loss
+        if self.minimizer_args['jac']:
+            torch_wrapper = functools.partial(torch_wrapper, return_grad=True)
 
         if hasattr(closure, 'model') and self.use_hess:
             def hess(x):
@@ -154,6 +167,7 @@ class MinimizeWrapper(torch.optim.Optimizer):
         for p, _p in zip(params, _params):
             p.data = _p
 
+
 class BasinHoppingWrapper(MinimizeWrapper):
     def __init__(self, params, minimizer_args, basinhopping_kwargs):
         self.basinhopping_kwargs = basinhopping_kwargs
@@ -162,3 +176,46 @@ class BasinHoppingWrapper(MinimizeWrapper):
     def minimize(self, func, x0, **minimizer_args):
         return basinhopping(func, x0, minimizer_kwargs=minimizer_args,
                 **self.basinhopping_kwargs)
+
+
+class DifferentialEvolutionWrapper(MinimizeWrapper):
+    def __init__(self, params, de_kwargs):
+        self.minimizer_args = {'jac': False}
+        self.de_kwargs = de_kwargs
+        params = self.set_floatX(params)
+        super(MinimizeWrapper, self).__init__(params, self.minimizer_args)
+
+    def minimize(self, func, x0, hess, **kwargs):
+        return differential_evolution(func, **self.de_kwargs)
+
+
+class SHGOWrapper(MinimizeWrapper):
+    def __init__(self, params, minimizer_args, shgo_kwargs):
+        minimizer_args.update({'jac': False})
+        self.shgo_kwargs = shgo_kwargs
+        super().__init__(params, minimizer_args)
+
+    def minimize(self, func, x0, **minimizer_args):
+        def jac_fun(x, *args):
+            return func(x, True)[1]
+        def obj_fun(x, *args):
+            return func(x, False)
+        minimizer_args['jac'] = jac_fun
+        return shgo(obj_fun, minimizer_kwargs=minimizer_args,
+                    args=[False],
+                    **self.shgo_kwargs)
+
+
+class DualAnnealingWrapper(MinimizeWrapper):
+    def __init__(self, params, minimizer_args, da_kwargs):
+        minimizer_args.update({'jac': False})
+        self.da_kwargs = da_kwargs 
+        super().__init__(params, minimizer_args)
+
+    def minimize(self, func, x0, **minimizer_args):
+        jac_fun = lambda x: func(x, True)[1]
+        minimizer_args['jac'] = jac_fun
+        return dual_annealing(func, local_search_options=minimizer_args,
+                args=[False],
+                **self.da_kwargs)
+
