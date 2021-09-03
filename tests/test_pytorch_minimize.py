@@ -27,9 +27,12 @@ class LogReg(nn.Module):
         output = F.log_softmax(x, dim=1)
         return output
 
-def main(method, disp=True, floatX='float32'):
+def main(method, disp=True, floatX='float32', cuda=False):
     # only run tests on CPU
-    device = torch.device('cpu')
+    if cuda:
+        device = torch.device('cuda')
+    else:
+        device = torch.device('cpu')
 
     # seed everything
     torch.manual_seed(0)
@@ -106,8 +109,14 @@ def test_hess_methods():
         for floatX in ['float32', 'float64']:
             _ = main(method, disp=False, floatX=floatX)
 
+def test_gpu():
+    # if there's a GPU, run this test (so this won't run on travis)
+    if torch.cuda.is_available():
+        for method in ["CG", "Newtom-CG"]:
+            main(method, disp=False, floatX='float32', cuda=True)
+
 if __name__ == "__main__":
-    res, loss = main("L-BFGS-B", floatX='float64')
+    res, loss = main("Newton-CG", floatX='float64', cuda=True)
     #res, loss = main("TNC", floatX='float32')
     # print(res)
     print(f"Train Loss: {loss:.2f}")
