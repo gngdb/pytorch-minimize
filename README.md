@@ -210,6 +210,25 @@ haven't done any profiling to find out if it's likely to be a big problem
 and it completes in seconds when optimizing a logistic regression on MNIST
 by conjugate gradients.
 
+### Other Implementations
+
+There are a few other projects that incorporate `scipy.optimize` and
+pytorch:
+
+* [This gist][mygist] I wrote in 2018 then forgot about creates an
+Objective object to pass into `scipy.optimize` but packs the arrays and
+gradients in approximately the same way.
+* [botorch's `gen_candidates_scipy`][botorch] wraps
+`scipy.optimize.minimize` and uses it to optimize acquisition functions as
+part of Bayesian Optimization.
+* [autograd-minimize][agmin] wraps the `minimize` function itself, allowing
+PyTorch or Tensorflow objectives to be passed directly to a function with
+the same interface as `scipy.optimize.minimize`.
+
+[agmin]: https://github.com/brunorigal/autograd-minimize
+[botorch]: https://github.com/pytorch/botorch/blob/main/botorch/generation/gen.py
+[mygist]: https://gist.github.com/gngdb/a9f912df362a85b37c730154ef3c294b
+
 How Does This Evaluate the Hessian?
 -----------------------------------
 
