@@ -11,6 +11,18 @@ Conjugate Gradient, Trust Region methods and others in PyTorch.
 reliable, although [the code](./pytorch_minimize/optim.py) (that's all of
 it) is small enough to be readable.
 
+* [Quickstart](#quickstart)
+  * [Install](#install)
+  * [Using The Optimizer](#using-the-optimizer)
+* [Which Algorithms Are Supported?](#which-algorithms-are-supported)
+  * [Methods that require Hessian evaluations](#methods-that-require-hessian-evaluations)
+  * [Algorithms without gradients](#algorithms-without-gradients)
+  * [Algorithms you can choose but don't work](#algorithms-you-can-choose-but-dont-work)
+* [Global Optimizers](#global-optimizers)
+* [How Does it Work?](#how-does-it-work)
+* [How Does This Evaluate the Hessian?](#how-does-this-evaluate-the-hessian)
+* [Credits](#credits)
+
 Quickstart
 ----------
 
@@ -278,3 +290,4 @@ This package was created with [Cookiecutter][] and the
 [scipy]: https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html
 [Cookiecutter]: https://github.com/audreyr/cookiecutter
 [audreyr]: https://github.com/audreyr/cookiecutter-pypackage
+
