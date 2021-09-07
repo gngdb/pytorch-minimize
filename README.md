@@ -184,6 +184,18 @@ basinhopping_kwargs = dict(niter=200)
 optimizer = BasinHoppingWrapper(model.parameters(), minimizer_args, basinhopping_kwargs)
 ```
 
+These are also illustrated in [this colab notebook][colab], where the
+following plots were generated:
+
+![Basin Hopping](images/rastrigin_BasinHoppingWrapper.png)
+
+![Differential Evolution](images/rastrigin_DifferentialEvolutionWrapper.png)
+
+![Dual Annealing](rastrigin_DualAnnealingWrapper.png)
+
+![Simplicial Homology Global Optimization](images/rastrigin_SHGOWrapper.png)
+
+[colab]: https://colab.research.google.com/drive/19hZSxw3ZT3IgWGD9ZOuOYryeJoOGenJU?usp=sharing
 [global]: https://docs.scipy.org/doc/scipy/reference/optimize.html#global-optimization
 
 How Does it Work?
