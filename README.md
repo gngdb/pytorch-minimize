@@ -20,6 +20,7 @@ it) is small enough to be readable.
   * [Algorithms you can choose but don't work](#algorithms-you-can-choose-but-dont-work)
 * [Global Optimizers](#global-optimizers)
 * [How Does it Work?](#how-does-it-work)
+  * [Other Implmentations](#other-implementations)
 * [How Does This Evaluate the Hessian?](#how-does-this-evaluate-the-hessian)
 * [Credits](#credits)
 
