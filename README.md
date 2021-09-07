@@ -39,7 +39,7 @@ The following install procedure isn't going to check these are installed.
 This package can be installed with `pip` directly from Github:
 
 ``` 
-python -m pip install git+https://github.com/gngdb/pytorch-minimize.git
+pip install git+https://github.com/gngdb/pytorch-minimize.git
 ```
 
 Or by cloning the repository and then installing:
@@ -191,7 +191,7 @@ following plots were generated:
 
 ![Differential Evolution](images/rastrigin_DifferentialEvolutionWrapper.png)
 
-![Dual Annealing](rastrigin_DualAnnealingWrapper.png)
+![Dual Annealing](images/rastrigin_DualAnnealingWrapper.png)
 
 ![Simplicial Homology Global Optimization](images/rastrigin_SHGOWrapper.png)
 
