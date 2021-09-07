@@ -78,22 +78,6 @@ optimization algorithm will be interrupted.
 
 [torch_lbfgs]: https://pytorch.org/docs/stable/optim.html#torch.optim.LBFGS
 
-### Basin Hopping
-
-A similar wrapper is provided for the [basin-hopping algorithm][hop]. To
-use it, provide keyword arguments for the `basinhopping` function in
-addition to the arguments for the inner loop `minimize` function:
-
-```
-from pytorch_minimize.optim import MinimizeWrapper
-minimizer_args = dict(method='CG', options={'disp':True, 'maxiter':100})
-basinhopping_kwargs = dict(niter=200)
-optimizer = MinimizeWrapper(model.parameters(), minimizer_args, basinhopping_kwargs)
-```
-
-The same closure must be defined as above.
-
-[hop]: https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.basinhopping.html#scipy.optimize.basinhopping
 
 Which Algorithms Are Supported?
 -------------------------------
@@ -165,6 +149,29 @@ You can still select them but they may not work:
 
 All the other methods that require gradients converged on a toy problem
 that is tested in Travis-CI.
+
+Global Optimizers
+-----------------
+
+There are a few [global optimization algorithms in
+`scipy.optimize`][global]. The following are supported via their own
+wrapper classes:
+
+* Basin Hopping via `BasinHoppingWrapper`
+* Differential Evolution via `DifferentialEvolutionWrapper`
+* Simplicial Homology Global Optimization via `SHGOWrapper`
+* Dual Annealing via `DualAnnealingWrapper`
+
+An example of how to use one of these wrappers:
+
+```
+from pytorch_minimize.optim import BasinHoppingWrapper
+minimizer_args = dict(method='CG', options={'disp':True, 'maxiter':100})
+basinhopping_kwargs = dict(niter=200)
+optimizer = BasinHoppingWrapper(model.parameters(), minimizer_args, basinhopping_kwargs)
+```
+
+[global]: https://docs.scipy.org/doc/scipy/reference/optimize.html#global-optimization
 
 How Does it Work?
 -----------------
