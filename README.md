@@ -242,6 +242,15 @@ the same interface as `scipy.optimize.minimize`.
 [botorch]: https://github.com/pytorch/botorch/blob/main/botorch/generation/gen.py
 [mygist]: https://gist.github.com/gngdb/a9f912df362a85b37c730154ef3c294b
 
+### Pure PyTorch Minimization
+
+`rfeinman` has implemented some of the algorithms available in `scipy.optimize`
+in a repository with [the same name as this repository][rfeinman]. That
+implementation is likely to be much more efficient and avoids switching between
+32 and 64 bit floats between Numpy and PyTorch.
+
+[rfeinman]: https://github.com/rfeinman/pytorch-minimize
+
 How Does This Evaluate the Hessian?
 -----------------------------------
 
