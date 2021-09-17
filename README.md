@@ -246,7 +246,7 @@ the same interface as `scipy.optimize.minimize`.
 
 `rfeinman` has implemented some of the algorithms available in `scipy.optimize`
 in a repository with [the same name as this repository][rfeinman]. That
-implementation is likely to be much more efficient and avoids switching between
+implementation is much more efficient and avoids switching between
 32 and 64 bit floats between Numpy and PyTorch.
 
 That repository also contains [a wrapper around scipy.optimize.minimize][rfeinmanwrapper].
