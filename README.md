@@ -155,7 +155,7 @@ gradients (such as `'Nelder-Mead'`, `'COBYLA'` or `'Powell'`), ensure that
 
 ### Algorithms you can choose but don't work
 
-Two algorithms I tested didn't converge on a toy problem or hit errors.
+Algorithms I tested didn't converge on a toy problem or hit errors.
 You can still select them but they may not work:
 
 * [Dogleg][]: `'dogleg'`
