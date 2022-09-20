@@ -300,7 +300,7 @@ and [PyTorch][pytorchcite].
 
 ```
 @misc{gray2021minimize,
-  author = {Gray, Gavin},
+  author = {Gray, Gavia},
   title = {PyTorch Minimize},
   year = {2021},
   publisher = {GitHub},
