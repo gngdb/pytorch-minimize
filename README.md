@@ -1,7 +1,15 @@
+
+> [!IMPORTANT]
+> This project is not in active development. [Functional updates to PyTorch would
+> make everything here cleaner and more reliable][func_issue]. Also, I haven't
+> tried it but [`rfeinman`'s re-implementation][rfeinman] of
+> `scipy.optimize` in PyTorch may be what you're looking for as it should have
+> the same functionality as this project in most cases.
+
+[func_issue]: https://github.com/gngdb/pytorch-minimize/issues/3
+
 PyTorch Minimize
 ================
-
-[![Build Status](https://travis-ci.com/gngdb/pytorch-minimize.svg?branch=master)](https://travis-ci.com/gngdb/pytorch-minimize)
 
 A wrapper for [`scipy.optimize.minimize`][scipy] to make it a PyTorch
 Optimizer implementing Conjugate Gradients, BFGS, l-BFGS, SLSQP, Newton
@@ -38,7 +46,7 @@ The following install procedure isn't going to check these are installed.
 
 This package can be installed with `pip` directly from Github:
 
-``` 
+```
 pip install git+https://github.com/gngdb/pytorch-minimize.git
 ```
 
@@ -80,7 +88,7 @@ optimizer.step(closure)
 
 This optimizer is intended for **deterministic optimisation problems**,
 such as [full batch learning problems][batch]. Because of this,
-`optimizer.step(closure)` should only need to be called **once**. 
+`optimizer.step(closure)` should only need to be called **once**.
 
 Can `.step(closure)` be called more than once? Technically yes, but it
 shouldn't be necessary because multiple steps are run internally up to the
@@ -99,7 +107,7 @@ Using PyTorch to calculate the Jacobian, the following algorithms are
 supported:
 
 * [Conjugate Gradients][conjugate]: `'CG'`
-* [Broyden-Fletcher-Goldfarb-Shanno (BFGS)][bfgs]: `'BFGS'` 
+* [Broyden-Fletcher-Goldfarb-Shanno (BFGS)][bfgs]: `'BFGS'`
 * [Limited-memory BFGS][lbfgs]: `'L-BFGS-B'` but **requires double precision**:
     * `nn.Module` containing parameters must be cast to double, example:
 `model = model.double()`
@@ -121,11 +129,11 @@ with the following methods is required (full MNIST example
 class Closure():
     def __init__(self, model):
         self.model = model
-    
+
     @staticmethod
     def loss(model):
         output = model(data)
-        return loss_fn(output, target) 
+        return loss_fn(output, target)
 
     def __call__(self):
         optimizer.zero_grad()
@@ -135,7 +143,7 @@ class Closure():
 closure = Closure(model)
 ```
 
-The following methods can then be used: 
+The following methods can then be used:
 
 * [Newton Conjugate Gradient](https://youtu.be/0qUAb94CpOw?t=30m41s): `'Newton-CG'`
 * [Newton Conjugate Gradient Trust-Region][trust]: `'trust-ncg'`
@@ -315,7 +323,7 @@ This package was created with [Cookiecutter][] and the
 [pytorchcite]: https://github.com/pytorch/pytorch/blob/master/CITATION
 [numpycite]: https://www.scipy.org/citing.html#numpy
 [scipycite]: https://www.scipy.org/citing.html#scipy-the-library
-[re_attr]: https://stackoverflow.com/a/31174427/6937913 
+[re_attr]: https://stackoverflow.com/a/31174427/6937913
 [deepcopy]: https://docs.python.org/3/library/copy.html#copy.deepcopy
 [monkey]: https://github.com/gngdb/pytorch-minimize/blob/master/pytorch_minimize/optim.py#L106-L122
 [forum]: https://discuss.pytorch.org/t/using-autograd-functional-jacobian-hessian-with-respect-to-nn-module-parameters/103994/3
